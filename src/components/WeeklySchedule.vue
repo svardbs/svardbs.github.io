@@ -56,9 +56,14 @@ function exportToExcel() {
 
   // Track where teams should be inserted
   const teamStartRow = wsData.length + 2
+  const teamColorMap: Record<string, string> = {}
+  const teamColors = ['FFB6C1', '87CEFA', '90EE90', 'FFFF99', 'FFDEAD', 'DDA0DD']
 
   let currentCol = 1 // start on second column
-  Object.entries(teams.value).forEach(([teamName, members]) => {
+  Object.entries(teams.value).forEach(([teamName, members], i) => {
+    const color = teamColors[i % teamColors.length]
+    teamColorMap[teamName] = color
+    console.log(color);
     wsData[teamStartRow] = wsData[teamStartRow] || []
     wsData[teamStartRow][currentCol] = teamName
     wsData[teamStartRow + 1] = wsData[teamStartRow + 1] || []
@@ -85,6 +90,22 @@ function exportToExcel() {
         }
       }
     })
+  })
+
+  Object.entries(ws).forEach(([cell, cellData]) => {
+    if (!cell.startsWith('!')) {
+      const value = String(cellData.v || '')
+      const match = value.match(/^(Lag \d+)/)
+      if (match) {
+        const team = match[1]
+        const color = teamColorMap[team]
+        console.log('teamcolor', color);
+        if (color) {
+          ws[cell].s = ws[cell].s || {}
+          ws[cell].s.fill = { fgColor: { rgb: color } }
+        }
+      }
+    }
   })
 
   // Set column width only for the first column
