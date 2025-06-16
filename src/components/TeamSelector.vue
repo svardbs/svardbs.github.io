@@ -1,8 +1,8 @@
 <template>
   <div class="space-y-2">
-    <label for="teams" class="block text-sm font-medium text-gray-300">Antal lag:</label>
+    <label for="teams" class="block text-sm font-medium text-gray-600 dark:text-gray-300">Antal lag:</label>
     <input id="teams" type="number" v-model.number="numberOfTeams" min="1"
-      class="w-full px-3 py-2 rounded-lg bg-gray-800 text-white border border-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-500" />
+      class="w-full px-3 py-2 rounded-lg bg-gray-300 dark:bg-gray-800 text-gray-600 dark:text-gray-300 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-cyan-500" />
   </div>
 </template>
 
