@@ -33,7 +33,7 @@ import GenerateButton from './components/GenerateButton.vue'
 import WeeklySchedule from './components/WeeklySchedule.vue'
 import { useScheduler } from './composables/useScheduler'
 
-const { schedule, teams, hasGeneratedTeams, activities } = useScheduler()
+const { schedule, teams, hasGeneratedTeams, activities, people } = useScheduler()
 
 const isDark = ref(false)
 
@@ -47,11 +47,13 @@ onMounted(() => {
   const storedTeams = localStorage.getItem('savedTeams')
   const storedGeneratedFlag = localStorage.getItem('hasGeneratedTeams')
   const storedActivities = localStorage.getItem('savedActivities')
+  const storedPeople = localStorage.getItem('savedPeople')
 
   if (storedSchedule) schedule.value = JSON.parse(storedSchedule)
   if (storedTeams) teams.value = JSON.parse(storedTeams)
   if (storedGeneratedFlag === 'true') hasGeneratedTeams.value = true
   if (storedActivities) activities.value = JSON.parse(storedActivities)
+  if (storedPeople) people.value = JSON.parse(storedPeople)
 })
 
 function toggleDark() {
@@ -77,6 +79,10 @@ watch(hasGeneratedTeams, (val) => {
 
 watch(activities, (newVal) => {
   localStorage.setItem('savedActivities', JSON.stringify(newVal))
+}, { deep: true })
+
+watch(people, (newVal) => {
+  localStorage.setItem('savedPeople', JSON.stringify(newVal))
 }, { deep: true })
 </script>
 
