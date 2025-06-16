@@ -31,6 +31,9 @@ import ActivityInput from './components/ActivityInput.vue'
 import TeamSelector from './components/TeamSelector.vue'
 import GenerateButton from './components/GenerateButton.vue'
 import WeeklySchedule from './components/WeeklySchedule.vue'
+import { useScheduler } from './composables/useScheduler'
+
+const { schedule, teams, hasGeneratedTeams } = useScheduler()
 
 const isDark = ref(false)
 
@@ -39,6 +42,14 @@ onMounted(() => {
   if (saved === 'dark') isDark.value = true
   else if (saved === 'light') isDark.value = false
   else isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches
+
+  const storedSchedule = localStorage.getItem('savedSchedule')
+  const storedTeams = localStorage.getItem('savedTeams')
+  const storedGeneratedFlag = localStorage.getItem('hasGeneratedTeams')
+
+  if (storedSchedule) schedule.value = JSON.parse(storedSchedule)
+  if (storedTeams) teams.value = JSON.parse(storedTeams)
+  if (storedGeneratedFlag === 'true') hasGeneratedTeams.value = true
 })
 
 function toggleDark() {
@@ -49,6 +60,18 @@ function toggleDark() {
 watch(isDark, (newVal) => {
   document.documentElement.classList.toggle('dark', newVal)
 }, { immediate: true })
+
+watch(schedule, (newVal) => {
+  localStorage.setItem('savedSchedule', JSON.stringify(newVal))
+}, { deep: true })
+
+watch(teams, (newVal) => {
+  localStorage.setItem('savedTeams', JSON.stringify(newVal))
+}, { deep: true })
+
+watch(hasGeneratedTeams, (val) => {
+  localStorage.setItem('hasGeneratedTeams', val ? 'true' : 'false')
+})
 </script>
 
 <style>

@@ -31,6 +31,7 @@ function generateTeams() {
 
   teams.value = newTeams
   hasGeneratedTeams.value = true
+  schedule.value = {}
 }
 
 function generateSchedule() {
