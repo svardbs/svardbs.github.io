@@ -1,7 +1,7 @@
 <template>
   <div v-if="Object.keys(schedule).length" class="mt-10">
     <h2 class="text-2xl font-semibold text-center mb-4 text-gray-600 dark:text-gray-300">Veckoschema</h2>
-    <div class="grid gap-4">
+    <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div v-for="(daySchedule, day) in schedule" :key="day"
         class="bg-gray-300 dark:bg-gray-800 border border-gray-700 rounded-lg p-4 shadow-md">
         <h3 class="text-lg font-bold text-blue-800 dark:text-blue-300 mb-2">{{ day }}</h3>
