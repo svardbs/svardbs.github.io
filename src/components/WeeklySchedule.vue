@@ -63,7 +63,6 @@ function exportToExcel() {
   Object.entries(teams.value).forEach(([teamName, members], i) => {
     const color = teamColors[i % teamColors.length]
     teamColorMap[teamName] = color
-    console.log(color);
     wsData[teamStartRow] = wsData[teamStartRow] || []
     wsData[teamStartRow][currentCol] = teamName
     wsData[teamStartRow + 1] = wsData[teamStartRow + 1] || []
@@ -99,7 +98,6 @@ function exportToExcel() {
       if (match) {
         const team = match[1]
         const color = teamColorMap[team]
-        console.log('teamcolor', color);
         if (color) {
           ws[cell].s = ws[cell].s || {}
           ws[cell].s.fill = { fgColor: { rgb: color } }
