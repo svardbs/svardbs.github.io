@@ -21,12 +21,12 @@ function generateTeams() {
   const newTeams: Record<string, string[]> = {}
 
   for (let i = 0; i < numberOfTeams.value; i++) {
-    newTeams[`Team ${i + 1}`] = []
+    newTeams[`Lag ${i + 1}`] = []
   }
 
   shuffled.forEach((person, i) => {
     const teamIndex = i % numberOfTeams.value!
-    newTeams[`Team ${teamIndex + 1}`].push(person)
+    newTeams[`Lag ${teamIndex + 1}`].push(person)
   })
 
   teams.value = newTeams
@@ -36,14 +36,14 @@ function generateTeams() {
 function generateSchedule() {
   if (!numberOfTeams.value || activities.value.length === 0) return
 
-  const days = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag', 'Söndag']
+  const days = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag', 'Nästa Söndag']
   const result: typeof schedule.value = {}
 
   days.forEach((day, dayIndex) => {
     result[day] = {}
     activities.value.forEach((activity, activityIndex) => {
       const teamIndex = (dayIndex + activityIndex) % numberOfTeams.value!
-      result[day][activity] = `Team ${teamIndex + 1}`
+      result[day][activity] = `Lag ${teamIndex + 1}`
     })
   })
 

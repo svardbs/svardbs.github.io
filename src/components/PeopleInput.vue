@@ -1,5 +1,5 @@
 <template>
-  <div class="space-y-2">
+  <div class="space-y-4">
     <div class="flex gap-2">
       <input v-model="name" @keyup.enter="handleAdd" placeholder="Ange namn"
         class="flex-1 px-3 py-2 rounded-lg bg-gray-800 text-white placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-blue-500" />
@@ -8,12 +8,14 @@
         Lägg till
       </button>
     </div>
-    <ul class="list-disc pl-5 text-sm text-gray-300">
-      <li v-for="(p, i) in people" :key="i">{{ p }}</li>
-    </ul>
+    <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+      <div v-for="(p, i) in people" :key="i" class="bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-sm text-white shadow-sm flex justify-between items-center">
+        <span class="truncate">{{ p }}</span>
+        <button @click="removePerson(i)" class="text-red-400 hover:text-red-200 font-bold ml-4">×</button>
+      </div>
+    </div>
   </div>
 </template>
-
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useScheduler } from '../composables/useScheduler'
@@ -25,5 +27,8 @@ function handleAdd() {
     addPerson(name.value)
     name.value = ''
   }
+}
+function removePerson(index: number) {
+  people.value.splice(index, 1)
 }
 </script>

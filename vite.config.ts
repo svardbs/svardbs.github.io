@@ -1,7 +1,13 @@
 import { defineConfig } from 'vite'
 import vue from '@vitejs/plugin-vue'
 
-export default defineConfig({
+// Only apply base when building for production
+export default defineConfig(({ command }) => ({
   plugins: [vue()],
-  base: '/', // required for root-level GitHub Pages repo
-})
+  base: command === 'build' ? '/' : '', // use '' for dev
+  server: {
+    port: 5173,
+    open: true,
+    strictPort: true,
+  }
+}))
