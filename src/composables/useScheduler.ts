@@ -6,6 +6,9 @@ const numberOfTeams = ref<number | null>(null)
 const teams = ref<Record<string, string[]>>({})
 const schedule = ref<Record<string, Record<string, string>>>({})
 const hasGeneratedTeams = ref(false)
+const blockedAssignments = ref<{ day: string, activity: string }[]>([])
+const days = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag', 'Nästa Söndag']
+const teamError = ref('')
 
 function addPerson(name: string) {
   if (name.trim()) people.value.push(name.trim())
@@ -16,7 +19,14 @@ function addActivity(activity: string) {
 }
 
 function generateTeams() {
-  if (!numberOfTeams.value || people.value.length === 0) return
+  if (!numberOfTeams.value || people.value.length === 0)
+  {
+    if (!numberOfTeams.value) {
+      teamError.value = 'Du måste välja antal lag'
+    }
+    return
+  }
+  teamError.value = '';
   const shuffled = [...people.value].sort(() => Math.random() - 0.5)
   const newTeams: Record<string, string[]> = {}
 
@@ -37,17 +47,37 @@ function generateTeams() {
 function generateSchedule() {
   if (!numberOfTeams.value || activities.value.length === 0) return
 
-  const days = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag', 'Nästa Söndag']
+  const teamNames = Object.keys(teams.value)
   const result: typeof schedule.value = {}
 
-  days.forEach((day, dayIndex) => {
-    result[day] = {}
-    activities.value.forEach((activity, activityIndex) => {
-      const teamIndex = (dayIndex + activityIndex) % numberOfTeams.value!
-      result[day][activity] = `Lag ${teamIndex + 1}`
-    })
+  const validAssignments: { day: string; activity: string }[] = []
+  for (const day of days) {
+    for (const activity of activities.value) {
+      const isBlocked = blockedAssignments.value.some(b => b.day === day && b.activity === activity)
+      if (!isBlocked) {
+        validAssignments.push({ day, activity })
+      }
+    }
+  }
+
+  const assignmentsPerTeam: Record<string, { day: string, activity: string }[]> = {}
+  teamNames.forEach(name => assignmentsPerTeam[name] = [])
+  validAssignments.forEach((assignment, index) => {
+    const team = teamNames[index % teamNames.length]
+    assignmentsPerTeam[team].push(assignment)
   })
 
+  // Build the result object
+  for (const day of days) {
+    result[day] = {}
+    for (const team of teamNames) {
+      for (const entry of assignmentsPerTeam[team]) {
+        if (entry.day === day) {
+          result[day][entry.activity] = team
+        }
+      }
+    }
+  }
   schedule.value = result
 }
 
@@ -59,6 +89,9 @@ export function useScheduler() {
     teams,
     schedule,
     hasGeneratedTeams,
+    blockedAssignments,
+    days,
+    teamError,
     addPerson,
     addActivity,
     generateTeams,

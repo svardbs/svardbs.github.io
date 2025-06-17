@@ -16,6 +16,7 @@
     <section class="space-y-6">
       <PeopleInput />
       <ActivityInput />
+      <BlockActivity />
       <TeamSelector />
       <GenerateButton />
       <WeeklySchedule />
@@ -31,9 +32,10 @@ import ActivityInput from './components/ActivityInput.vue'
 import TeamSelector from './components/TeamSelector.vue'
 import GenerateButton from './components/GenerateButton.vue'
 import WeeklySchedule from './components/WeeklySchedule.vue'
+import BlockActivity from './components/BlockActivity.vue'
 import { useScheduler } from './composables/useScheduler'
 
-const { schedule, teams, hasGeneratedTeams, activities, people } = useScheduler()
+const { schedule, teams, hasGeneratedTeams, activities, people, blockedAssignments } = useScheduler()
 
 const isDark = ref(false)
 
@@ -48,12 +50,14 @@ onMounted(() => {
   const storedGeneratedFlag = localStorage.getItem('hasGeneratedTeams')
   const storedActivities = localStorage.getItem('savedActivities')
   const storedPeople = localStorage.getItem('savedPeople')
+  const storedblockedAssignments = localStorage.getItem('savedblockedAssignments')
 
   if (storedSchedule) schedule.value = JSON.parse(storedSchedule)
   if (storedTeams) teams.value = JSON.parse(storedTeams)
   if (storedGeneratedFlag === 'true') hasGeneratedTeams.value = true
   if (storedActivities) activities.value = JSON.parse(storedActivities)
   if (storedPeople) people.value = JSON.parse(storedPeople)
+  if (storedblockedAssignments) blockedAssignments.value = JSON.parse(storedblockedAssignments)
 })
 
 function toggleDark() {
@@ -83,6 +87,10 @@ watch(activities, (newVal) => {
 
 watch(people, (newVal) => {
   localStorage.setItem('savedPeople', JSON.stringify(newVal))
+}, { deep: true })
+
+watch(blockedAssignments, (newVal) => {
+  localStorage.setItem('savedblockedAssignments', JSON.stringify(newVal))
 }, { deep: true })
 </script>
 
