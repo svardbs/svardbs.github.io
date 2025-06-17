@@ -49,20 +49,16 @@ function exportToExcel() {
     const row: any[] = [activity]
     allDays.forEach(day => {
       const teamName = schedule.value[day][activity]
-      row.push(`${teamName}`)
+      row.push(teamName ?? '--------------------')
     })
     wsData[i + 1] = row
   })
 
   // Track where teams should be inserted
   const teamStartRow = wsData.length + 2
-  const teamColorMap: Record<string, string> = {}
-  const teamColors = ['FFB6C1', '87CEFA', '90EE90', 'FFFF99', 'FFDEAD', 'DDA0DD']
 
   let currentCol = 1 // start on second column
-  Object.entries(teams.value).forEach(([teamName, members], i) => {
-    const color = teamColors[i % teamColors.length]
-    teamColorMap[teamName] = color
+  Object.entries(teams.value).forEach(([teamName, members]) => {
     wsData[teamStartRow] = wsData[teamStartRow] || []
     wsData[teamStartRow][currentCol] = teamName
     wsData[teamStartRow + 1] = wsData[teamStartRow + 1] || []
@@ -75,36 +71,6 @@ function exportToExcel() {
   })
 
   const ws = XLSX.utils.aoa_to_sheet(wsData)
-
-  // Apply bold font to headers
-  const headerRows = [0, teamStartRow + 1]
-  headerRows.forEach(r => {
-    const header = wsData[r]
-    if (!header) return
-    header.forEach((_, c) => {
-      const cellAddress = XLSX.utils.encode_cell({ r, c })
-      if (ws[cellAddress]) {
-        ws[cellAddress].s = {
-          font: { bold: true },
-        }
-      }
-    })
-  })
-
-  Object.entries(ws).forEach(([cell, cellData]) => {
-    if (!cell.startsWith('!')) {
-      const value = String(cellData.v || '')
-      const match = value.match(/^(Lag \d+)/)
-      if (match) {
-        const team = match[1]
-        const color = teamColorMap[team]
-        if (color) {
-          ws[cell].s = ws[cell].s || {}
-          ws[cell].s.fill = { fgColor: { rgb: color } }
-        }
-      }
-    }
-  })
 
   // Set column width only for the first column
   ws['!cols'] = [{ wch: 30 }]
