@@ -29,6 +29,7 @@
 
 <script setup lang="ts">
 import { useScheduler } from '../composables/useScheduler'
+
 const {
   hasGeneratedTeams,
   generateTeams,

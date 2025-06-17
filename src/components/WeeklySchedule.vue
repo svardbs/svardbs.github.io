@@ -1,5 +1,5 @@
 <template>
-  <div v-if="Object.keys(schedule).length" class="mt-10">
+  <div v-if="Object.keys(schedule).length" class="w-full mt-10">
     <h2 class="text-2xl font-semibold text-center mb-4 text-gray-600 dark:text-gray-300">Veckoschema</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
       <div v-for="(daySchedule, day) in schedule" :key="day"
@@ -15,11 +15,19 @@
         </ul>
       </div>
     </div>
-    <div class="text-right mt-4">
+    <div class="mt-4 flex flex-wrap justify-between items-center">
+      <div v-if="shareUrl" class="flex items-center bg-gray-100 dark:bg-gray-800 rounded-full px-3 py-1">
+        <a :href="shareUrl" target="_blank" title="Delningslänk" class="text-sm truncate max-w-[200px] text-gray-800 dark:text-white hover:underline">{{ shareUrl }}</a>
+        <button @click="copyToClipboard" class="ml-2 text-blue-600 hover:text-blue-800">
+          📋
+        </button>
+        <span v-if="copySuccess" class="text-green-600 text-sm">Länk kopierad!</span>
+      </div>
       <button @click="exportToExcel"
         class="bg-emerald-600 hover:bg-emerald-700 text-white px-4 py-2 rounded-lg shadow-md">
         Exportera till Excel
       </button>
+      
     </div>
   </div>
 </template>
@@ -27,10 +35,20 @@
 <script setup lang="ts">
 import { useScheduler } from '../composables/useScheduler'
 import * as XLSX from 'xlsx'
-const { activities, schedule, teams } = useScheduler()
+import { ref } from 'vue'
+const { activities, schedule, teams, shareUrl } = useScheduler()
 
 function getTeamMembers(teamLabel: string): string[] {
   return teams.value[teamLabel] || []
+}
+
+const copySuccess = ref(false)
+function copyToClipboard() {
+  if (!shareUrl.value) return
+  navigator.clipboard.writeText(shareUrl.value).then(() => {
+    copySuccess.value = true
+    setTimeout(() => (copySuccess.value = false), 2000)
+  })
 }
 
 function exportToExcel() {

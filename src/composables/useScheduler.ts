@@ -1,4 +1,6 @@
 import { ref } from 'vue'
+import { db } from './firebase'
+import { collection, addDoc } from 'firebase/firestore'
 
 const people = ref<string[]>([])
 const activities = ref<string[]>([])
@@ -9,6 +11,7 @@ const hasGeneratedTeams = ref(false)
 const blockedAssignments = ref<{ day: string, activity: string }[]>([])
 const days = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag', 'Nästa Söndag']
 const teamError = ref('')
+const shareUrl = ref('')
 
 function addPerson(name: string) {
   if (name.trim()) people.value.push(name.trim())
@@ -44,9 +47,10 @@ function generateTeams() {
   schedule.value = {}
 }
 
-function generateSchedule() {
+async function generateSchedule() {
   if (!numberOfTeams.value || activities.value.length === 0) return
 
+  const days = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag', 'Söndag']
   const teamNames = Object.keys(teams.value)
   const result: typeof schedule.value = {}
 
@@ -67,7 +71,6 @@ function generateSchedule() {
     assignmentsPerTeam[team].push(assignment)
   })
 
-  // Build the result object
   for (const day of days) {
     result[day] = {}
     for (const team of teamNames) {
@@ -78,7 +81,16 @@ function generateSchedule() {
       }
     }
   }
+
   schedule.value = result
+
+  // Store schedule in Firebase with unique ID
+  const docRef = await addDoc(collection(db, 'schedules'), {
+    schedule: result,
+    teams: teams.value
+  })
+
+  shareUrl.value = `${location.origin}${location.pathname}?schedule=${docRef.id}`
 }
 
 export function useScheduler() {
@@ -92,6 +104,7 @@ export function useScheduler() {
     blockedAssignments,
     days,
     teamError,
+    shareUrl,
     addPerson,
     addActivity,
     generateTeams,

@@ -13,12 +13,18 @@
       <p class="text-sm text-gray-600 dark:text-gray-300">Skapa slumpmässiga lag och generera ett veckoschema</p>
     </header>
 
-    <section class="space-y-6">
+    <section v-if="!hideForm" class="space-y-6">
       <PeopleInput />
       <ActivityInput />
       <BlockActivity />
       <TeamSelector />
       <GenerateButton />
+      <WeeklySchedule />
+    </section>
+    <section v-else class="flex flex-col items-center space-y-6">
+      <div v-if="hasGeneratedTeams" class="w-full max-w-lg">
+        <GeneratedTeams /> 
+      </div>  
       <WeeklySchedule />
     </section>
   </main>
@@ -33,11 +39,15 @@ import TeamSelector from './components/TeamSelector.vue'
 import GenerateButton from './components/GenerateButton.vue'
 import WeeklySchedule from './components/WeeklySchedule.vue'
 import BlockActivity from './components/BlockActivity.vue'
+import GeneratedTeams from './components/GeneratedTeams.vue'
 import { useScheduler } from './composables/useScheduler'
+import { doc, getDoc } from 'firebase/firestore'
+import { db } from './composables/firebase'
 
 const { schedule, teams, hasGeneratedTeams, activities, people, blockedAssignments } = useScheduler()
 
 const isDark = ref(false)
+const hideForm = ref(false)
 
 onMounted(() => {
   const saved = localStorage.getItem('theme')
@@ -45,16 +55,24 @@ onMounted(() => {
   else if (saved === 'light') isDark.value = false
   else isDark.value = window.matchMedia('(prefers-color-scheme: dark)').matches
 
-  const storedSchedule = localStorage.getItem('savedSchedule')
-  const storedTeams = localStorage.getItem('savedTeams')
-  const storedGeneratedFlag = localStorage.getItem('hasGeneratedTeams')
+  const urlParams = new URLSearchParams(location.search)
+  const sharedId = urlParams.get('schedule')
+  if (sharedId) {
+    getDoc(doc(db, 'schedules', sharedId)).then(docSnap => {
+      if (docSnap.exists()) {
+        const data = docSnap.data()
+        schedule.value = data.schedule
+        teams.value = data.teams
+        hasGeneratedTeams.value = true
+        hideForm.value = true
+      }
+    })
+  }
+
   const storedActivities = localStorage.getItem('savedActivities')
   const storedPeople = localStorage.getItem('savedPeople')
   const storedblockedAssignments = localStorage.getItem('savedblockedAssignments')
 
-  if (storedSchedule) schedule.value = JSON.parse(storedSchedule)
-  if (storedTeams) teams.value = JSON.parse(storedTeams)
-  if (storedGeneratedFlag === 'true') hasGeneratedTeams.value = true
   if (storedActivities) activities.value = JSON.parse(storedActivities)
   if (storedPeople) people.value = JSON.parse(storedPeople)
   if (storedblockedAssignments) blockedAssignments.value = JSON.parse(storedblockedAssignments)
@@ -68,18 +86,6 @@ function toggleDark() {
 watch(isDark, (newVal) => {
   document.documentElement.classList.toggle('dark', newVal)
 }, { immediate: true })
-
-watch(schedule, (newVal) => {
-  localStorage.setItem('savedSchedule', JSON.stringify(newVal))
-}, { deep: true })
-
-watch(teams, (newVal) => {
-  localStorage.setItem('savedTeams', JSON.stringify(newVal))
-}, { deep: true })
-
-watch(hasGeneratedTeams, (val) => {
-  localStorage.setItem('hasGeneratedTeams', val ? 'true' : 'false')
-})
 
 watch(activities, (newVal) => {
   localStorage.setItem('savedActivities', JSON.stringify(newVal))
