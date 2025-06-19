@@ -50,9 +50,7 @@ function generateTeams() {
 async function generateSchedule() {
   if (!numberOfTeams.value || activities.value.length === 0) return
 
-  const days = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag', 'Söndag']
   const teamNames = Object.keys(teams.value)
-  const result: typeof schedule.value = {}
 
   const validAssignments: { day: string; activity: string }[] = []
   for (const day of days) {
@@ -71,22 +69,24 @@ async function generateSchedule() {
     assignmentsPerTeam[team].push(assignment)
   })
 
+  const ordered: { day: string; tasks: Record<string,string> }[] = []
+
   for (const day of days) {
-    result[day] = {}
+    const tasks: Record<string,string> = {}
     for (const team of teamNames) {
       for (const entry of assignmentsPerTeam[team]) {
-        if (entry.day === day) {
-          result[day][entry.activity] = team
-        }
+        if (entry.day === day) tasks[entry.activity] = team
       }
     }
+    ordered.push({ day, tasks })
   }
 
-  schedule.value = result
+  schedule.value = Object.fromEntries(
+    ordered.map(o => [o.day, o.tasks])
+  )
 
-  // Store schedule in Firebase with unique ID
   const docRef = await addDoc(collection(db, 'schedules'), {
-    schedule: result,
+    schedule: ordered,
     teams: teams.value
   })
 

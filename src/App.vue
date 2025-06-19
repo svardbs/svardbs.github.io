@@ -61,7 +61,11 @@ onMounted(() => {
     getDoc(doc(db, 'schedules', sharedId)).then(docSnap => {
       if (docSnap.exists()) {
         const data = docSnap.data()
-        schedule.value = data.schedule
+        
+        schedule.value = Object.fromEntries(
+          data.schedule.map( (row: any) => [row.day, row.tasks] )
+        )
+
         teams.value = data.teams
         hasGeneratedTeams.value = true
         hideForm.value = true
