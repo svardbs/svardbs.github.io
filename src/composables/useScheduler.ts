@@ -92,47 +92,36 @@ async function generateSchedule() {
   if (!numberOfTeams.value || activities.value.length === 0) return
 
   const teamNames = Object.keys(teams.value)
+  const teamCount = teamNames.length
   const scheduleDays = getScheduleDays(scheduleStartDay.value, scheduleDayCount.value)
 
-  const validAssignments: { day: string; activity: string }[] = []
-  console.log(blockedAssignments.value)
-  for (const day of scheduleDays) {
-    const displayDay = getDisplayDay(day)
-    for (const activity of activities.value) {
-      const isDayBlocked = blockedAssignments.value.some(b => b.day === day && !b.activity)
-      const isActivityBlocked = blockedAssignments.value.some(b => b.day === day && b.activity === activity)
-      if (!isDayBlocked && !isActivityBlocked) {
-        validAssignments.push({ day, activity })
-      }
-    }
-  }
+  const result: Record<string, Record<string, string>> = {}
 
-  const assignmentsPerTeam: Record<string, { day: string, activity: string }[]> = {}
-  teamNames.forEach(name => assignmentsPerTeam[name] = [])
-  validAssignments.forEach((assignment, index) => {
-    const team = teamNames[index % teamNames.length]
-    assignmentsPerTeam[team].push(assignment)
+  scheduleDays.forEach((dayKey, dIdx) => {
+    result[dayKey] = {}
+
+    const isWholeDayBlocked =
+      blockedAssignments.value.some(b => b.day === dayKey && !b.activity)
+    if (isWholeDayBlocked) return // skip the entire day
+
+    activities.value.forEach((activity, aIdx) => {
+      const isPairBlocked = blockedAssignments.value.some(
+        b => b.day === dayKey && b.activity === activity
+      )
+      if (isPairBlocked) return
+
+      // distribute: shift by day index so each day starts with a new leading team
+      const team = teamNames[(dIdx + aIdx) % teamCount]
+      result[dayKey][activity] = team
+    })
   })
 
-  const ordered: { day: string; tasks: Record<string,string> }[] = []
+  schedule.value = result
 
-  for (const day of scheduleDays) {
-    const tasks: Record<string,string> = {}
-    for (const team of teamNames) {
-      for (const entry of assignmentsPerTeam[team]) {
-        if (entry.day === day) tasks[entry.activity] = team
-      }
-    }
-    ordered.push({ day, tasks })
-  }
-
-  schedule.value = Object.fromEntries(
-    ordered.map(o => [o.day, o.tasks])
-  )
-
+  const ordered = Object.entries(result).map(([day, tasks]) => ({ day, tasks }))
   const docRef = await addDoc(collection(db, 'schedules'), {
     schedule: ordered,
-    teams: teams.value
+    teams: teams.value,
   })
 
   shareUrl.value = `${location.origin}${location.pathname}?schedule=${docRef.id}`
