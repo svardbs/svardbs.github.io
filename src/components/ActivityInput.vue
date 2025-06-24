@@ -1,5 +1,6 @@
 <template>
   <div class="space-y-4">
+    <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">Aktiviteter</h2>
     <div class="flex gap-2">
       <input v-model="activity" @keyup.enter="handleAdd" placeholder="Ange aktivitet (Lunch, middag, diska osv.)"
         class="flex-1 px-3 py-2 rounded-lg bg-gray-300 dark:bg-gray-800 text-gray-600 dark:text-gray-300 placeholder-gray-400 border border-gray-600 focus:outline-none focus:ring-2 focus:ring-purple-500" />

@@ -1,17 +1,21 @@
-import { ref } from 'vue'
+import { ref, computed } from 'vue'
 import { db } from './firebase'
 import { collection, addDoc } from 'firebase/firestore'
 
 const people = ref<string[]>([])
 const activities = ref<string[]>([])
-const numberOfTeams = ref<number | null>(null)
+const numberOfTeams = ref(1)
 const teams = ref<Record<string, string[]>>({})
 const schedule = ref<Record<string, Record<string, string>>>({})
 const hasGeneratedTeams = ref(false)
 const blockedAssignments = ref<{ day: string, activity: string }[]>([])
-const days = ['Söndag', 'Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag', 'Nästa Söndag']
 const teamError = ref('')
 const shareUrl = ref('')
+
+const allDays = ['Måndag', 'Tisdag', 'Onsdag', 'Torsdag', 'Fredag', 'Lördag', 'Söndag']
+const scheduleStartDay = ref('Måndag')
+const scheduleDayCount = ref(7)
+const scheduleDays = ref<string[]>([])
 
 function addPerson(name: string) {
   if (name.trim()) people.value.push(name.trim())
@@ -20,6 +24,43 @@ function addPerson(name: string) {
 function addActivity(activity: string) {
   if (activity.trim()) activities.value.push(activity.trim())
 }
+
+function getScheduleDays(startDay: string, count: number): string[] {
+  const startIndex = allDays.indexOf(startDay)
+  if (startIndex === -1 || count < 1) return []
+  const days: string[] = []
+  for (let i = 0; i < count; i++) {
+    const baseDay = allDays[(startIndex + i) % allDays.length]
+    const week = Math.floor((startIndex + i) / allDays.length) + 1
+    days.push(`V${week}-${baseDay}`)
+  }
+  return days
+}
+
+function getDisplayDay(dbKey: string): string {
+  return dbKey.includes('-') ? dbKey.split('-')[1] : dbKey
+}
+
+function getAllDisplayDays(): string[] {
+  scheduleDays.value = getScheduleDays(scheduleStartDay.value, scheduleDayCount.value)
+  return [...new Set(allDays.map(getDisplayDay))]
+}
+
+function getWeek(dbKey: string) {
+  const m = dbKey.match(/^V(\d+)-/)
+  return m ? Number(m[1]) : 1
+}
+
+// Computed for UI grouping
+const groupedSchedule = computed(() => {
+  const groups: Record<number, string[]> = {}
+  Object.keys(schedule.value).forEach(key => {
+    const w = getWeek(key)
+    groups[w] = groups[w] || []
+    groups[w].push(key)
+  })
+  return groups
+})
 
 function generateTeams() {
   if (!numberOfTeams.value || people.value.length === 0)
@@ -51,9 +92,12 @@ async function generateSchedule() {
   if (!numberOfTeams.value || activities.value.length === 0) return
 
   const teamNames = Object.keys(teams.value)
+  const scheduleDays = getScheduleDays(scheduleStartDay.value, scheduleDayCount.value)
 
   const validAssignments: { day: string; activity: string }[] = []
-  for (const day of days) {
+  console.log(blockedAssignments.value)
+  for (const day of scheduleDays) {
+    const displayDay = getDisplayDay(day)
     for (const activity of activities.value) {
       const isDayBlocked = blockedAssignments.value.some(b => b.day === day && !b.activity)
       const isActivityBlocked = blockedAssignments.value.some(b => b.day === day && b.activity === activity)
@@ -72,7 +116,7 @@ async function generateSchedule() {
 
   const ordered: { day: string; tasks: Record<string,string> }[] = []
 
-  for (const day of days) {
+  for (const day of scheduleDays) {
     const tasks: Record<string,string> = {}
     for (const team of teamNames) {
       for (const entry of assignmentsPerTeam[team]) {
@@ -103,12 +147,18 @@ export function useScheduler() {
     schedule,
     hasGeneratedTeams,
     blockedAssignments,
-    days,
     teamError,
     shareUrl,
+    allDays,
+    scheduleDayCount,
+    scheduleStartDay,
+    scheduleDays,
     addPerson,
     addActivity,
     generateTeams,
     generateSchedule,
+    getAllDisplayDays,
+    getDisplayDay,
+    groupedSchedule,
   }
 }

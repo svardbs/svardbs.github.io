@@ -2,17 +2,24 @@
   <div v-if="Object.keys(schedule).length" class="w-full mt-10">
     <h2 class="text-2xl font-semibold text-center mb-4 text-gray-600 dark:text-gray-300">Veckoschema</h2>
     <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-      <div v-for="(daySchedule, day) in schedule" :key="day"
-        class="bg-gray-300 dark:bg-gray-800 border border-gray-700 rounded-lg p-4 shadow-md">
-        <h3 class="text-lg font-bold text-blue-800 dark:text-blue-300 mb-2">{{ day }}</h3>
-        <ul class="text-sm text-gray-600 dark:text-gray-300 pl-4 list-disc">
-          <li v-for="(team, activity) in daySchedule" :key="activity">
-            {{ activity }}:
-            <span>
-              {{ team }} ({{ getTeamMembers(team).join(', ') }})
-            </span>
-          </li>
-        </ul>
+      <div v-for="(dayKeys, week) in groupedSchedule" :key="week" class="bg-gray-300 dark:bg-gray-800 border border-gray-700 rounded-lg p-4 shadow-md">
+        <h3 class="text-lg font-bold text-emerald-600 dark:text-emerald-400 mb-2">
+          Vecka {{ week }}
+        </h3>
+
+        <div v-for="dayKey in dayKeys" :key="dayKey" class="mb-4">
+          <h4 class="font-semibold text-gray-800 dark:text-gray-200">
+            {{ getDisplayDay(dayKey) }}
+          </h4>
+          <ul class="text-sm text-gray-600 dark:text-gray-300 pl-4 list-disc">
+            <li v-for="(team, activity) in schedule[dayKey]" :key="activity">
+              {{ activity }}:
+              <span>
+                {{ team }} ({{ getTeamMembers(team).join(', ') }})
+              </span>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
     <div class="mt-4 flex flex-wrap justify-between items-center">
@@ -36,7 +43,7 @@
 import { useScheduler } from '../composables/useScheduler'
 import * as XLSX from 'xlsx'
 import { ref } from 'vue'
-const { activities, schedule, teams, shareUrl } = useScheduler()
+const { activities, schedule, teams, shareUrl, getDisplayDay, groupedSchedule } = useScheduler()
 
 function getTeamMembers(teamLabel: string): string[] {
   return teams.value[teamLabel] || []
@@ -54,46 +61,39 @@ function copyToClipboard() {
 function exportToExcel() {
   const wb = XLSX.utils.book_new()
   const wsData: any[][] = []
+  const allGroups = groupedSchedule.value
 
-  const allDays = Object.keys(schedule.value)
-  const allActivities = activities.value
-
-  // Add schedule header
-  const scheduleHeader = ['Aktivitet', ...allDays]
-  wsData[0] = scheduleHeader
-
-  // Insert schedule rows
-  allActivities.forEach((activity, i) => {
-    const row: any[] = [activity]
-    allDays.forEach(day => {
-      const teamName = schedule.value[day][activity]
-      row.push(teamName ?? '--------------------')
+  // Add schedule by week blocks
+  Object.entries(allGroups).forEach(([week, dayKeys]) => {
+    wsData.push([`Vecka ${week}`])
+    const displayDays = dayKeys.map(d => getDisplayDay(d))
+    wsData.push(['Aktivitet', ...displayDays])
+    activities.value.forEach(act => {
+      const row = [act]
+      dayKeys.forEach(d => {
+        row.push(schedule.value[d]?.[act] ?? '--------------------')
+      })
+      wsData.push(row)
     })
-    wsData[i + 1] = row
+    wsData.push([]) // Blank row between weeks
   })
 
-  // Track where teams should be inserted
-  const teamStartRow = wsData.length + 2
-
-  let currentCol = 1 // start on second column
-  Object.entries(teams.value).forEach(([teamName, members]) => {
-    wsData[teamStartRow] = wsData[teamStartRow] || []
-    wsData[teamStartRow][currentCol] = teamName
-    wsData[teamStartRow + 1] = wsData[teamStartRow + 1] || []
-
-    members.forEach((member, i) => {
-      wsData[teamStartRow + 1 + i] = wsData[teamStartRow + 1 + i] || []
-      wsData[teamStartRow + 1 + i][currentCol] = member
+  // Add teams at the end
+  const start = wsData.length + 2
+  let col = 1
+  Object.entries(teams.value).forEach(([name, mems]) => {
+    wsData[start] = wsData[start] || []
+    wsData[start][col] = name
+    mems.forEach((m, i) => {
+      wsData[start + 1 + i] = wsData[start + 1 + i] || []
+      wsData[start + 1 + i][col] = m
     })
-    currentCol += 2 // skip one column between teams
+    col += 2
   })
 
   const ws = XLSX.utils.aoa_to_sheet(wsData)
-
-  // Set column width only for the first column
   ws['!cols'] = [{ wch: 30 }]
-
-  XLSX.utils.book_append_sheet(wb, ws, 'Schema + Lag')
-  XLSX.writeFile(wb, 'veckoschema_spanien.xlsx')
+  XLSX.utils.book_append_sheet(wb, ws, 'Schema')
+  XLSX.writeFile(wb, 'schema.xlsx')
 }
 </script>

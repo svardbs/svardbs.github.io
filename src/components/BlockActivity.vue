@@ -1,10 +1,11 @@
 <template>
-  <div class="my-6">
+  <div v-if="scheduleDays && scheduleDays.length > 0" class="my-6">
     <h2 class="text-lg font-semibold text-gray-800 dark:text-white mb-2">Blockera aktivitet</h2>
-    <div class="flex gap-4 items-center mb-2">
+    <p class="text-sm text-gray-600 dark:text-gray-300 mb-4">Välj att blockera en hel dag eller en specifik aktivitet</p>
+    <div class="flex gap-4 items-center mb-4">
       <select v-model="blockedDay" class="bg-gray-300 dark:bg-gray-800 border border-gray-400 dark:border-gray-600 text-gray-600 dark:text-gray-300 px-3 py-2 rounded-md">
         <option disabled value="">Välj dag</option>
-        <option v-for="day in days" :key="day">{{ day }}</option>
+        <option v-for="day in scheduleDays" :key="day">{{ day }}</option>
       </select>
       <select v-model="blockedActivity" class="bg-gray-300 dark:bg-gray-800 border border-gray-400 dark:border-gray-600 text-gray-600 dark:text-gray-300 px-3 py-2 rounded-md">
         <option disabled value="">Välj aktivitet</option>
@@ -28,20 +29,16 @@
 <script setup lang="ts">
 import { ref } from 'vue'
 import { useScheduler } from '../composables/useScheduler'
-const { activities, blockedAssignments, days } = useScheduler()
+const { activities, blockedAssignments, scheduleDays } = useScheduler()
 
 const blockedDay = ref('')
 const blockedActivity = ref('')
 
 function addBlockedActivity() {
-  if (blockedDay.value && blockedActivity.value) {
+  if (blockedDay.value) {
     blockedAssignments.value.push({ day: blockedDay.value, activity: blockedActivity.value })
     blockedDay.value = ''
     blockedActivity.value = ''
-  }
-  else if (blockedDay.value) {
-      blockedAssignments.value.push({ day: blockedDay.value, activity: blockedActivity.value })
-      blockedDay.value = ''
   }
 }
 

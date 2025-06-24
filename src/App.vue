@@ -16,6 +16,7 @@
     <section v-if="!hideForm" class="space-y-6">
       <PeopleInput />
       <ActivityInput />
+      <ScheduleDaysSelector />
       <BlockActivity />
       <TeamSelector />
       <GenerateButton />
@@ -40,11 +41,12 @@ import GenerateButton from './components/GenerateButton.vue'
 import WeeklySchedule from './components/WeeklySchedule.vue'
 import BlockActivity from './components/BlockActivity.vue'
 import GeneratedTeams from './components/GeneratedTeams.vue'
+import ScheduleDaysSelector from './components/ScheduleDaysSelector.vue'
 import { useScheduler } from './composables/useScheduler'
 import { doc, getDoc } from 'firebase/firestore'
 import { db } from './composables/firebase'
 
-const { schedule, teams, hasGeneratedTeams, activities, people, blockedAssignments } = useScheduler()
+const { schedule, teams, hasGeneratedTeams, activities, people } = useScheduler()
 
 const isDark = ref(false)
 const hideForm = ref(false)
@@ -75,11 +77,9 @@ onMounted(() => {
 
   const storedActivities = localStorage.getItem('savedActivities')
   const storedPeople = localStorage.getItem('savedPeople')
-  const storedblockedAssignments = localStorage.getItem('savedblockedAssignments')
 
   if (storedActivities) activities.value = JSON.parse(storedActivities)
   if (storedPeople) people.value = JSON.parse(storedPeople)
-  if (storedblockedAssignments) blockedAssignments.value = JSON.parse(storedblockedAssignments)
 })
 
 function toggleDark() {
@@ -97,10 +97,6 @@ watch(activities, (newVal) => {
 
 watch(people, (newVal) => {
   localStorage.setItem('savedPeople', JSON.stringify(newVal))
-}, { deep: true })
-
-watch(blockedAssignments, (newVal) => {
-  localStorage.setItem('savedblockedAssignments', JSON.stringify(newVal))
 }, { deep: true })
 </script>
 
