@@ -17,7 +17,7 @@
       <div class="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
         <div v-for="(entry, index) in blockedAssignments" :key="index"
             class="bg-gray-300 dark:bg-gray-800 border border-gray-700 rounded-lg px-4 py-2 text-sm text-gray-600 dark:text-gray-300 shadow-sm flex justify-between items-center">
-            <span class="truncate">{{ entry.day }} – {{ entry.activity }}</span>
+            <span class="truncate">{{ entry.activity ? entry.day + ' - ' + entry.activity : entry.day + ' - Heldag' }}</span>
             <button @click="removeBlockedActivity(index)" class="text-red-400 hover:text-red-200 font-bold ml-4">×</button>
         </div>
       </div>    
@@ -38,6 +38,10 @@ function addBlockedActivity() {
     blockedAssignments.value.push({ day: blockedDay.value, activity: blockedActivity.value })
     blockedDay.value = ''
     blockedActivity.value = ''
+  }
+  else if (blockedDay.value) {
+      blockedAssignments.value.push({ day: blockedDay.value, activity: blockedActivity.value })
+      blockedDay.value = ''
   }
 }
 

@@ -55,8 +55,9 @@ async function generateSchedule() {
   const validAssignments: { day: string; activity: string }[] = []
   for (const day of days) {
     for (const activity of activities.value) {
-      const isBlocked = blockedAssignments.value.some(b => b.day === day && b.activity === activity)
-      if (!isBlocked) {
+      const isDayBlocked = blockedAssignments.value.some(b => b.day === day && !b.activity)
+      const isActivityBlocked = blockedAssignments.value.some(b => b.day === day && b.activity === activity)
+      if (!isDayBlocked && !isActivityBlocked) {
         validAssignments.push({ day, activity })
       }
     }
