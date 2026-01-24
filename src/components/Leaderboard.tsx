@@ -20,7 +20,7 @@ function LeaderboardList({ entries, type }: { entries: LeaderboardEntry[]; type:
   if (entries.length === 0) {
     return (
       <div className="text-center py-8 text-muted-foreground">
-        Inga spel registrerade ännu
+        Inga spel med utdelning ännu
       </div>
     );
   }
