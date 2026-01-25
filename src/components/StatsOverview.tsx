@@ -8,7 +8,7 @@ interface StatsOverviewProps {
 }
 
 export function StatsOverview({ stats }: StatsOverviewProps) {
-  const { totalProfit, totalLoss, averagePerPerson, totalParticipants } = stats;
+  const { totalProfit, totalLoss, averagePerPerson, totalGamesPlayed } = stats;
   
   return (
     <div className="grid gap-4 md:grid-cols-3">
@@ -52,7 +52,7 @@ export function StatsOverview({ stats }: StatsOverviewProps) {
             {formatSEK(averagePerPerson)}
           </div>
           <p className="text-xs text-muted-foreground mt-1">
-            {totalParticipants} deltagare totalt
+            {totalGamesPlayed} spel totalt
           </p>
         </CardContent>
       </Card>
