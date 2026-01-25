@@ -1,9 +1,10 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { History, ChevronDown, Users, Coins, Calculator } from 'lucide-react';
+import { History, ChevronDown, Users, Coins, Calculator, X } from 'lucide-react';
 import { formatSEK, formatDate, formatDecimal } from '@/lib/formatters';
 import { Game } from '@/hooks/useGames';
+import { useDeleteGame } from '@/hooks/useGames';
 
 interface GameHistoryProps {
   games: Game[];
@@ -11,11 +12,19 @@ interface GameHistoryProps {
 
 function GameRow({ game }: { game: Game }) {
   const [isOpen, setIsOpen] = useState(false);
+  const { mutate: deleteGame, isLoading } = useDeleteGame()
+
   const result = game.utdelning - game.total_insats;
   const utdelningPerDeltagare = game.antal_deltagare > 0 
     ? game.utdelning / game.antal_deltagare 
     : 0;
   
+  const handleDelete = (e: React.MouseEvent) => {
+    console.log('click');
+    e.stopPropagation();
+    deleteGame(game.id);
+  };
+
   return (
     <Collapsible open={isOpen} onOpenChange={setIsOpen}>
       <CollapsibleTrigger className="w-full">

@@ -54,6 +54,27 @@ export function useAddGame() {
   });
 }
 
+export function useDeleteGame() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async (gameId: string) => {
+      console.log(gameId);
+      const { error } = await supabase
+        .from('games')
+        .delete()
+        .eq('id', gameId);
+
+        if (error) throw error;
+      return gameId;
+    },
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ['games'] });
+    },
+  });
+}
+
+
 export interface GameStats {
   totalProfit: number;
   totalLoss: number;
@@ -94,38 +115,15 @@ export interface LeaderboardEntry {
   value: number;
 }
 
-export function getLeaderboard(games: Game[], type: 'antal_ratt' | 'utdelning'): LeaderboardEntry[] {
-  // Get highest value per player for the specified type
-  const playerBest = new Map<string, number>();
-  
-  games.forEach((game) => {
-    const key = game.spellaggare.toLowerCase();
-    const value = type === 'antal_ratt' ? game.antal_ratt : game.utdelning;
-    const current = playerBest.get(key) || 0;
-    if (value > current) {
-      playerBest.set(key, value);
-    }
-  });
-  
-  // Find original casing for display
-  const playerNames = new Map<string, string>();
-  games.forEach((game) => {
-    const key = game.spellaggare.toLowerCase();
-    if (!playerNames.has(key)) {
-      playerNames.set(key, game.spellaggare);
-    }
-  });
-  
-  // Convert to array and sort
-  const entries: LeaderboardEntry[] = [];
-  playerBest.forEach((value, key) => {
-    entries.push({
-      spellaggare: playerNames.get(key) || key,
-      value,
-    });
-  });
-  
-  return entries
+export function getLeaderboard(
+  games: Game[],
+  type: 'antal_ratt' | 'utdelning'
+): LeaderboardEntry[] {
+  return games
+    .map((game) => ({
+      spellaggare: game.spellaggare,
+      value: type === 'antal_ratt' ? game.antal_ratt : game.utdelning,
+    }))
     .sort((a, b) => b.value - a.value)
     .slice(0, 10);
 }

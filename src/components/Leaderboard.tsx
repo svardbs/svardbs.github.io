@@ -29,8 +29,8 @@ function LeaderboardList({ entries, type }: { entries: LeaderboardEntry[]; type:
     <div className="space-y-2">
       {entries.map((entry, index) => (
         <div 
-          key={entry.spellaggare}
-          className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
+        key={`${entry.spellaggare}-${index}`}
+        className={`flex items-center justify-between p-3 rounded-lg transition-colors ${
             index < 3 ? 'bg-accent/50' : 'bg-secondary/30'
           }`}
         >
