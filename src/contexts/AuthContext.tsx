@@ -2,24 +2,24 @@ import React, { createContext, useContext, useState, useCallback, ReactNode } fr
 
 interface AuthContextType {
   isAdmin: boolean;
-  login: (username: string, password: string) => Promise<boolean>;
+  login: (email: string, password: string) => Promise<boolean>;
   logout: () => void;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
-// Hardcoded admin credentials
-const ADMIN_USERNAME = 'antonsvard';
-const ADMIN_PASSWORD = 'svardadmin!"#';
+// Admin credentials from environment variables (protected by .gitignore)
+const ADMIN_EMAIL = import.meta.env.VITE_ADMIN_EMAIL;
+const ADMIN_PASSWORD = import.meta.env.VITE_ADMIN_PASSWORD;
 
 export function AuthProvider({ children }: { children: ReactNode }) {
   const [isAdmin, setIsAdmin] = useState<boolean>(() => {
     return sessionStorage.getItem('isAdmin') === 'true';
   });
 
-  const login = useCallback(async (username: string, password: string): Promise<boolean> => {
-    // Simple hardcoded credential check
-    if (username === ADMIN_USERNAME && password === ADMIN_PASSWORD) {
+  const login = useCallback(async (email: string, password: string): Promise<boolean> => {
+    // Check credentials against environment variables
+    if (email === ADMIN_EMAIL && password === ADMIN_PASSWORD) {
       setIsAdmin(true);
       sessionStorage.setItem('isAdmin', 'true');
       return true;

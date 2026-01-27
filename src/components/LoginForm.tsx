@@ -12,7 +12,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import { Shield, Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
-  username: z.string().min(1, 'Användarnamn krävs'),
+  email: z.string().email('Ogiltig e-postadress').min(1, 'E-post krävs'),
   password: z.string().min(1, 'Lösenord krävs'),
 });
 
@@ -23,19 +23,19 @@ export function LoginForm() {
   const { toast } = useToast();
   const { login } = useAuth();
   const [isLoading, setIsLoading] = useState(false);
-  
+
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
-      username: '',
+      email: '',
       password: '',
     },
   });
-  
+
   async function onSubmit(values: FormValues) {
     setIsLoading(true);
     try {
-      const success = await login(values.username, values.password);
+      const success = await login(values.email, values.password);
       if (success) {
         toast({
           title: 'Inloggad',
@@ -70,12 +70,12 @@ export function LoginForm() {
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
             <FormField
               control={form.control}
-              name="username"
+              name="email"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>Användarnamn</FormLabel>
+                  <FormLabel>E-post</FormLabel>
                   <FormControl>
-                    <Input placeholder="Ange användarnamn" {...field} />
+                    <Input type="email" placeholder="admin@example.com" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
