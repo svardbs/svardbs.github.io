@@ -32,7 +32,7 @@ function GameRow({ game }: { game: Game }) {
           <div className="flex items-center gap-4">
             <div className="text-left">
               <p className="font-medium">{game.spellaggare}</p>
-              <p className="text-sm text-muted-foreground">{formatDate(game.created_at)}</p>
+              <p className="text-sm text-muted-foreground">{formatDate(game.datum)}</p>
             </div>
           </div>
           <div className="flex items-center gap-6">

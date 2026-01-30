@@ -12,6 +12,7 @@ import { useAddGame } from '@/hooks/useGames';
 import { Plus, Loader2 } from 'lucide-react';
 
 const formSchema = z.object({
+  datum: z.string().min(1, 'Datum krävs'),
   spellaggare: z.string().min(1, 'Spelläggare krävs'),
   antal_deltagare: z.coerce.number().int().positive('Måste vara större än 0'),
   total_insats: z.coerce.number().min(0, 'Måste vara 0 eller högre'),
@@ -29,6 +30,7 @@ export function AddGameForm() {
   const form = useForm<FormValues>({
     resolver: zodResolver(formSchema),
     defaultValues: {
+      datum: new Date().toISOString().split('T')[0], // Today's date in YYYY-MM-DD format
       spellaggare: '',
       antal_deltagare: 1,
       total_insats: 0,
@@ -40,6 +42,7 @@ export function AddGameForm() {
   async function onSubmit(values: FormValues) {
     try {
       await addGame.mutateAsync({
+        datum: values.datum,
         spellaggare: values.spellaggare,
         antal_deltagare: values.antal_deltagare,
         total_insats: values.total_insats,
@@ -72,6 +75,20 @@ export function AddGameForm() {
       <CardContent>
         <Form {...form}>
           <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
+            <FormField
+              control={form.control}
+              name="datum"
+              render={({ field }) => (
+                <FormItem>
+                  <FormLabel>Datum</FormLabel>
+                  <FormControl>
+                    <Input type="date" {...field} />
+                  </FormControl>
+                  <FormMessage />
+                </FormItem>
+              )}
+            />
+
             <FormField
               control={form.control}
               name="spellaggare"

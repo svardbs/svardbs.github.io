@@ -3,15 +3,16 @@ import { supabase } from '@/integrations/supabase/client';
 
 export interface Game {
   id: string;
+  datum: string;
   spellaggare: string;
   antal_deltagare: number;
   total_insats: number;
   antal_ratt: number;
   utdelning: number;
-  created_at: string;
 }
 
 export interface NewGame {
+  datum: string;
   spellaggare: string;
   antal_deltagare: number;
   total_insats: number;
@@ -26,8 +27,8 @@ export function useGames() {
       const { data, error } = await supabase
         .from('games')
         .select('*')
-        .order('created_at', { ascending: false });
-      
+        .order('datum', { ascending: false });
+
       if (error) throw error;
       return data || [];
     },
