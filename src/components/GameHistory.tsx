@@ -1,7 +1,7 @@
 import { useState } from 'react';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
-import { History, ChevronDown, Users, Coins, Calculator, X } from 'lucide-react';
+import { History, ChevronDown, Users, Coins, Calculator, X, Calendar } from 'lucide-react';
 import { formatSEK, formatDate, formatDecimal } from '@/lib/formatters';
 import { Game } from '@/hooks/useGames';
 import { useDeleteGame } from '@/hooks/useGames';
@@ -32,7 +32,10 @@ function GameRow({ game }: { game: Game }) {
           <div className="flex items-center gap-4">
             <div className="text-left">
               <p className="font-medium">{game.spellaggare}</p>
-              <p className="text-sm text-muted-foreground">{formatDate(game.datum)}</p>
+              <div className="flex items-center gap-1.5">
+                <Calendar className="h-3.5 w-3.5 text-white" />
+                <p className="text-sm text-muted-foreground">{formatDate(game.datum)}</p>
+              </div>
             </div>
           </div>
           <div className="flex items-center gap-6">

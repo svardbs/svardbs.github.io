@@ -82,7 +82,7 @@ export function AddGameForm() {
                 <FormItem>
                   <FormLabel>Datum</FormLabel>
                   <FormControl>
-                    <Input type="date" {...field} />
+                    <Input type="date" className="[&::-webkit-calendar-picker-indicator]:invert [&::-webkit-calendar-picker-indicator]:cursor-pointer" {...field} />
                   </FormControl>
                   <FormMessage />
                 </FormItem>
