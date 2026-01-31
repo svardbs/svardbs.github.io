@@ -8,15 +8,14 @@ interface StatsOverviewProps {
 }
 
 export function StatsOverview({ stats }: StatsOverviewProps) {
-  const { totalProfit, totalLoss, averagePerPerson, totalGamesPlayed } = stats;
-  const netTotal = totalProfit + totalLoss;
+  const { totalProfit, totalLoss, averagePerPerson, totalGamesPlayed, netTotal, averageParticipants } = stats;
 
   return (
     <div className="grid gap-4 md:grid-cols-3">
       <Card className="bg-card border-border">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-2xl font-semibold leading-none tracking-tight flex items-center gap-2">
-            Total vinst
+            Total utdelning
           </CardTitle>
           <TrendingUp className="h-4 w-4 text-profit" />
         </CardHeader>
@@ -30,7 +29,7 @@ export function StatsOverview({ stats }: StatsOverviewProps) {
       <Card className="bg-card border-border">
         <CardHeader className="flex flex-row items-center justify-between pb-2">
           <CardTitle className="text-2xl font-semibold leading-none tracking-tight flex items-center gap-2">
-            Total förlust
+            Total insats
           </CardTitle>
           <TrendingDown className="h-4 w-4 text-destructive" />
         </CardHeader>
@@ -58,7 +57,7 @@ export function StatsOverview({ stats }: StatsOverviewProps) {
               {formatSEK(averagePerPerson)}
             </div>
             <p className="text-xs text-muted-foreground mt-1">
-              {totalGamesPlayed} spel totalt
+              {totalGamesPlayed} spel totalt. Genomsnitt {averageParticipants} deltagare per spel.
             </p>
           </div>
         </CardContent>

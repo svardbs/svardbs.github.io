@@ -81,33 +81,40 @@ export interface GameStats {
   totalLoss: number;
   averagePerPerson: number;
   totalGamesPlayed: number;
+  netTotal: number;
+  averageParticipants: number;
 }
 
 export function calculateGameStats(games: Game[]): GameStats {
   let totalProfit = 0;
   let totalLoss = 0;
-  let totalGamesPlayed = games.length;
+  const totalGamesPlayed = games.length;
   let averagePerPerson = 0;
+  let allParticipants = 0;
 
   games.forEach((game) => {
-    const result = game.utdelning - game.total_insats;
-
-    if (result >= 0) {
-      totalProfit += result;
-    } else {
-      totalLoss += result;
+    if (game.utdelning > 0) {
+      averagePerPerson += game.utdelning / game.antal_deltagare;
+    } else {    
+      averagePerPerson -= game.total_insats / game.antal_deltagare;
     }
 
-    if (game.antal_deltagare > 0) {
-      averagePerPerson += result / game.antal_deltagare;
-    }
+    totalProfit += game.utdelning;
+    totalLoss -= game.total_insats;
+    allParticipants += game.antal_deltagare;
   });
+
+  const netTotal = totalProfit + totalLoss;
+  averagePerPerson = netTotal / allParticipants;
+  const averageParticipants = Math.round(allParticipants / totalGamesPlayed);
 
   return {
     totalProfit,
     totalLoss,
     averagePerPerson,
     totalGamesPlayed,
+    netTotal,
+    averageParticipants
   };
 }
 
