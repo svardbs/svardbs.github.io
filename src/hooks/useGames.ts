@@ -78,7 +78,7 @@ export function useDeleteGame() {
 
 export interface GameStats {
   totalProfit: number;
-  totalLoss: number;
+  totalBet: number;
   averagePerPerson: number;
   totalGamesPlayed: number;
   netTotal: number;
@@ -87,7 +87,7 @@ export interface GameStats {
 
 export function calculateGameStats(games: Game[]): GameStats {
   let totalProfit = 0;
-  let totalLoss = 0;
+  let totalBet = 0;
   const totalGamesPlayed = games.length;
   let averagePerPerson = 0;
   let allParticipants = 0;
@@ -95,22 +95,22 @@ export function calculateGameStats(games: Game[]): GameStats {
   games.forEach((game) => {
     if (game.utdelning > 0) {
       averagePerPerson += game.utdelning / game.antal_deltagare;
-    } else {    
+    } else {
       averagePerPerson -= game.total_insats / game.antal_deltagare;
     }
 
     totalProfit += game.utdelning;
-    totalLoss -= game.total_insats;
+    totalBet += game.total_insats;
     allParticipants += game.antal_deltagare;
   });
 
-  const netTotal = totalProfit + totalLoss;
+  const netTotal = totalProfit - totalBet;
   averagePerPerson = netTotal / allParticipants;
   const averageParticipants = Math.round(allParticipants / totalGamesPlayed);
 
   return {
     totalProfit,
-    totalLoss,
+    totalBet,
     averagePerPerson,
     totalGamesPlayed,
     netTotal,

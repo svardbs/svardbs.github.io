@@ -83,6 +83,11 @@ function GameRow({ game }: { game: Game }) {
 }
 
 export function GameHistory({ games }: GameHistoryProps) {
+  // Sort games by date, latest first
+  const sortedGames = [...games].sort((a, b) =>
+    new Date(b.datum).getTime() - new Date(a.datum).getTime()
+  );
+
   return (
     <Card className="bg-card border-border">
       <CardHeader>
@@ -92,13 +97,13 @@ export function GameHistory({ games }: GameHistoryProps) {
         </CardTitle>
       </CardHeader>
       <CardContent>
-        {games.length === 0 ? (
+        {sortedGames.length === 0 ? (
           <div className="text-center py-8 text-muted-foreground">
             Inga spel registrerade ännu
           </div>
         ) : (
           <div className="space-y-3">
-            {games.map((game) => (
+            {sortedGames.map((game) => (
               <GameRow key={game.id} game={game} />
             ))}
           </div>

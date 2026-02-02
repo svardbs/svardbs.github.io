@@ -41,7 +41,7 @@ const Index = () => {
           </div>
         ) : (
           <>
-            <StatsOverview stats={stats} />
+            <StatsOverview stats={stats} games={games} />
             <div className="grid gap-8 lg:grid-cols-2">
               <Leaderboard 
                 antalRattLeaderboard={antalRattLeaderboard} 
