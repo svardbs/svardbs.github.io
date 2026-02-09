@@ -105,7 +105,7 @@ export function calculateGameStats(games: Game[]): GameStats {
   });
 
   const netTotal = totalProfit - totalBet;
-  averagePerPerson = netTotal / allParticipants;
+  averagePerPerson = Math.floor(netTotal / allParticipants);
   const averageParticipants = Math.round(allParticipants / totalGamesPlayed);
 
   return {

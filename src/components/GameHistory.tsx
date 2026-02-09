@@ -16,7 +16,7 @@ function GameRow({ game }: { game: Game }) {
 
   const result = game.utdelning - game.total_insats;
   const utdelningPerDeltagare = game.antal_deltagare > 0 
-    ? game.utdelning / game.antal_deltagare 
+    ? Math.floor(game.utdelning / game.antal_deltagare) 
     : 0;
   
   const handleDelete = (e: React.MouseEvent) => {
