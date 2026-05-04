@@ -1,5 +1,15 @@
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
-import { supabase } from '@/integrations/supabase/client';
+import {
+  collection,
+  addDoc,
+  deleteDoc,
+  doc,
+  getDocs,
+  orderBy,
+  query,
+  serverTimestamp,
+} from 'firebase/firestore';
+import { db } from '@/integrations/firebase/client';
 
 export interface Game {
   id: string;
@@ -20,34 +30,28 @@ export interface NewGame {
   utdelning: number;
 }
 
+const gamesCollection = collection(db, 'games');
+
 export function useGames() {
   return useQuery({
     queryKey: ['games'],
     queryFn: async (): Promise<Game[]> => {
-      const { data, error } = await supabase
-        .from('games')
-        .select('*')
-        .order('datum', { ascending: false });
-
-      if (error) throw error;
-      return data || [];
+      const snapshot = await getDocs(query(gamesCollection, orderBy('datum', 'desc')));
+      return snapshot.docs.map((d) => ({ id: d.id, ...(d.data() as Omit<Game, 'id'>) }));
     },
   });
 }
 
 export function useAddGame() {
   const queryClient = useQueryClient();
-  
+
   return useMutation({
     mutationFn: async (newGame: NewGame) => {
-      const { data, error } = await supabase
-        .from('games')
-        .insert([newGame])
-        .select()
-        .single();
-      
-      if (error) throw error;
-      return data;
+      const docRef = await addDoc(gamesCollection, {
+        ...newGame,
+        created_at: serverTimestamp(),
+      });
+      return { id: docRef.id, ...newGame };
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ['games'] });
@@ -60,13 +64,7 @@ export function useDeleteGame() {
 
   return useMutation({
     mutationFn: async (gameId: string) => {
-      console.log(gameId);
-      const { error } = await supabase
-        .from('games')
-        .delete()
-        .eq('id', gameId);
-
-        if (error) throw error;
+      await deleteDoc(doc(db, 'games', gameId));
       return gameId;
     },
     onSuccess: () => {
