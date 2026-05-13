@@ -1,4 +1,5 @@
 import { useState } from 'react';
+import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Collapsible, CollapsibleContent, CollapsibleTrigger } from '@/components/ui/collapsible';
 import { History, ChevronDown, Users, Coins, Calculator, X, Calendar } from 'lucide-react';
@@ -82,11 +83,18 @@ function GameRow({ game }: { game: Game }) {
   );
 }
 
+const PAGE_SIZE = 10;
+
 export function GameHistory({ games }: GameHistoryProps) {
+  const [visibleCount, setVisibleCount] = useState(PAGE_SIZE);
+
   // Sort games by date, latest first
   const sortedGames = [...games].sort((a, b) =>
     new Date(b.datum).getTime() - new Date(a.datum).getTime()
   );
+
+  const visibleGames = sortedGames.slice(0, visibleCount);
+  const hasMore = visibleCount < sortedGames.length;
 
   return (
     <Card className="bg-card border-border">
@@ -103,9 +111,19 @@ export function GameHistory({ games }: GameHistoryProps) {
           </div>
         ) : (
           <div className="space-y-3">
-            {sortedGames.map((game) => (
+            {visibleGames.map((game) => (
               <GameRow key={game.id} game={game} />
             ))}
+            {hasMore && (
+              <div className="flex justify-center pt-2">
+                <Button
+                  variant="outline"
+                  onClick={() => setVisibleCount((c) => c + PAGE_SIZE)}
+                >
+                  Visa fler
+                </Button>
+              </div>
+            )}
           </div>
         )}
       </CardContent>

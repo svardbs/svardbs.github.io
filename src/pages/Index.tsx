@@ -2,6 +2,7 @@ import { Header } from '@/components/Header';
 import { StatsOverview } from '@/components/StatsOverview';
 import { Leaderboard } from '@/components/Leaderboard';
 import { GameHistory } from '@/components/GameHistory';
+import { SpellaggareSummary } from '@/components/SpellaggareSummary';
 import { useGames, calculateGameStats, getLeaderboard } from '@/hooks/useGames';
 import { Skeleton } from '@/components/ui/skeleton';
 
@@ -43,12 +44,13 @@ const Index = () => {
           <>
             <StatsOverview stats={stats} games={games} />
             <div className="grid gap-8 lg:grid-cols-2">
-              <Leaderboard 
-                antalRattLeaderboard={antalRattLeaderboard} 
-                utdelningLeaderboard={utdelningLeaderboard} 
+              <Leaderboard
+                antalRattLeaderboard={antalRattLeaderboard}
+                utdelningLeaderboard={utdelningLeaderboard}
               />
               <GameHistory games={games} />
             </div>
+            <SpellaggareSummary games={games} />
           </>
         )}
       </main>
