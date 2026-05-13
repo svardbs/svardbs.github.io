@@ -10,7 +10,7 @@ interface StatsOverviewProps {
 }
 
 export function StatsOverview({ stats, games }: StatsOverviewProps) {
-  const { totalProfit, totalBet, averagePerPerson, totalGamesPlayed, netTotal, averageParticipants } = stats;
+  const { totalProfit, totalBet, averagePerPerson, averagePerPersonPerGame, totalGamesPlayed, netTotal, averageParticipants } = stats;
   const roi = totalBet > 0 ? (netTotal / totalBet) * 100 : 0;
 
   // Calculate cumulative net total for sparkline (starting from 0)
@@ -56,7 +56,10 @@ export function StatsOverview({ stats, games }: StatsOverviewProps) {
                 {totalGamesPlayed} spel · Snitt {averageParticipants} deltagare/spel
               </div>
               <div className="mt-1 text-sm text-muted-foreground">
-                Snitt per person: <span className={`text-sm ${averagePerPerson >= 0 ? 'text-profit' : 'text-destructive'}`}>{formatSEK(averagePerPerson)}</span>
+                Snitt per person/totalt: <span className={`text-sm ${averagePerPerson >= 0 ? 'text-profit' : 'text-destructive'}`}>{formatSEK(averagePerPerson)}</span>
+              </div>
+              <div className="mt-1 text-sm text-muted-foreground">
+                Snitt per person/spel: <span className={`text-sm ${averagePerPersonPerGame >= 0 ? 'text-profit' : 'text-destructive'}`}>{formatSEK(averagePerPersonPerGame)}</span>
               </div>
             </div>
             {chartData.length > 1 && (
