@@ -1,17 +1,31 @@
+import { useMemo, useState } from 'react';
 import { Header } from '@/components/Header';
 import { StatsOverview } from '@/components/StatsOverview';
 import { Leaderboard } from '@/components/Leaderboard';
 import { GameHistory } from '@/components/GameHistory';
 import { SpellaggareSummary } from '@/components/SpellaggareSummary';
-import { useGames, calculateGameStats, getLeaderboard } from '@/hooks/useGames';
+import { useGames, calculateGameStats, getLeaderboard, getSeason, getCurrentSeason } from '@/hooks/useGames';
 import { Skeleton } from '@/components/ui/skeleton';
 
 const Index = () => {
   const { data: games = [], isLoading, error } = useGames();
-  
-  const stats = calculateGameStats(games);
-  const antalRattLeaderboard = getLeaderboard(games, 'antal_ratt');
-  const utdelningLeaderboard = getLeaderboard(games, 'utdelning');
+  const currentSeason = getCurrentSeason();
+  const [selectedSeason, setSelectedSeason] = useState(currentSeason);
+
+  const seasonOptions = useMemo(() => {
+    const seasons = new Set(games.map((game) => getSeason(game.datum)));
+    seasons.add(currentSeason);
+    return Array.from(seasons).sort();
+  }, [games, currentSeason]);
+
+  const seasonGames = useMemo(
+    () => games.filter((game) => getSeason(game.datum) === selectedSeason),
+    [games, selectedSeason]
+  );
+
+  const stats = calculateGameStats(seasonGames);
+  const antalRattLeaderboard = getLeaderboard(seasonGames, 'antal_ratt');
+  const utdelningLeaderboard = getLeaderboard(seasonGames, 'utdelning');
 
   if (error) {
     return (
@@ -42,15 +56,21 @@ const Index = () => {
           </div>
         ) : (
           <>
-            <StatsOverview stats={stats} games={games} />
+            <StatsOverview
+              stats={stats}
+              games={seasonGames}
+              season={selectedSeason}
+              seasonOptions={seasonOptions}
+              onSeasonChange={setSelectedSeason}
+            />
             <div className="grid gap-8 lg:grid-cols-2">
               <Leaderboard
                 antalRattLeaderboard={antalRattLeaderboard}
                 utdelningLeaderboard={utdelningLeaderboard}
               />
-              <GameHistory games={games} />
+              <GameHistory games={seasonGames} />
             </div>
-            <SpellaggareSummary games={games} />
+            <SpellaggareSummary games={seasonGames} />
           </>
         )}
       </main>

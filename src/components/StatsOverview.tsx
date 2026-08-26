@@ -3,13 +3,23 @@ import { TrendingUp, TrendingDown, Users } from 'lucide-react';
 import { formatSEK, formatDecimal } from '@/lib/formatters';
 import { GameStats, Game } from '@/hooks/useGames';
 import { LineChart, Line, ResponsiveContainer, YAxis, ReferenceLine } from 'recharts';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 
 interface StatsOverviewProps {
   stats: GameStats;
   games: Game[];
+  season: string;
+  seasonOptions: string[];
+  onSeasonChange: (season: string) => void;
 }
 
-export function StatsOverview({ stats, games }: StatsOverviewProps) {
+export function StatsOverview({ stats, games, season, seasonOptions, onSeasonChange }: StatsOverviewProps) {
   const { totalProfit, totalBet, averagePerPerson, averagePerPersonPerGame, totalGamesPlayed, netTotal, averageParticipants } = stats;
   const roi = totalBet > 0 ? (netTotal / totalBet) * 100 : 0;
 
@@ -36,7 +46,21 @@ export function StatsOverview({ stats, games }: StatsOverviewProps) {
       {/* Header */}
       <div className="flex items-center justify-between">
         <h1 className="text-3xl font-bold">IVEO Stryktipset</h1>
-        <span className="text-sm text-muted-foreground">Period: 2026</span>
+        <div className="flex items-center gap-2">
+          <span className="text-sm text-muted-foreground">Period:</span>
+          <Select value={season} onValueChange={onSeasonChange}>
+            <SelectTrigger className="w-[120px] h-8">
+              <SelectValue />
+            </SelectTrigger>
+            <SelectContent>
+              {seasonOptions.map((option) => (
+                <SelectItem key={option} value={option}>
+                  {option}
+                </SelectItem>
+              ))}
+            </SelectContent>
+          </Select>
+        </div>
       </div>
 
       {/* Full width Netto card */}

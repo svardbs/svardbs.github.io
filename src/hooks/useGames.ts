@@ -118,6 +118,19 @@ export function calculateGameStats(games: Game[]): GameStats {
   };
 }
 
+const SEASON_START_MONTH = 7; // August (0-indexed)
+
+export function getSeason(datum: string): string {
+  const date = new Date(datum);
+  const year = date.getFullYear();
+  const startYear = date.getMonth() >= SEASON_START_MONTH ? year : year - 1;
+  return `${startYear}/${startYear + 1}`;
+}
+
+export function getCurrentSeason(): string {
+  return getSeason(new Date().toISOString());
+}
+
 export interface LeaderboardEntry {
   spellaggare: string;
   value: number;
